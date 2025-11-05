@@ -1,35 +1,30 @@
 #!/bin/bash
 
+# Exit immediately if a command exits with a non-zero status.
 set -e
 
 echo "🚀 Starting DevOps/SRE dotfiles installation..."
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-# Detect OS
+# Detect OS and Architecture
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
-echo -e "${GREEN}OS: $OS${NC}"
-echo -e "${GREEN}Architecture: $ARCH${NC}"
+echo "OS: $OS"
+echo "Architecture: $ARCH"
 
 # Update and install basic packages
-echo -e "${YELLOW}📦 Installing basic packages...${NC}"
+echo "📦 Installing basic packages..."
 sudo apt-get update -qq
 sudo apt-get install -y curl wget git zsh vim unzip jq python3-pip bat fzf ripgrep htop
 
 # Install Oh My Zsh
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo -e "${YELLOW}🎨 Installing Oh My Zsh...${NC}"
+    echo "🎨 Installing Oh My Zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
 # Install zsh plugins
-echo -e "${YELLOW}🔌 Installing zsh plugins...${NC}"
+echo "🔌 Installing zsh plugins..."
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
 # zsh-autosuggestions
@@ -43,7 +38,7 @@ if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
 fi
 
 # Install kubectl
-echo -e "${YELLOW}☸️  Installing kubectl...${NC}"
+echo "☸️  Installing kubectl..."
 if ! command -v kubectl &> /dev/null; then
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
     sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
@@ -51,7 +46,7 @@ if ! command -v kubectl &> /dev/null; then
 fi
 
 # Install kubectx and kubens
-echo -e "${YELLOW}🔄 Installing kubectx and kubens...${NC}"
+echo "🔄 Installing kubectx and kubens..."
 if ! command -v kubectx &> /dev/null; then
     sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
     sudo ln -sf /opt/kubectx/kubectx /usr/local/bin/kubectx
@@ -59,7 +54,7 @@ if ! command -v kubectx &> /dev/null; then
 fi
 
 # Install k9s
-echo -e "${YELLOW}🐕 Installing k9s...${NC}"
+echo "🐕 Installing k9s..."
 if ! command -v k9s &> /dev/null; then
     K9S_VERSION=$(curl -s https://api.github.com/repos/derailed/k9s/releases/latest | jq -r '.tag_name')
     wget -q https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_amd64.tar.gz
@@ -69,13 +64,13 @@ if ! command -v k9s &> /dev/null; then
 fi
 
 # Install Helm
-echo -e "${YELLOW}⎈ Installing Helm...${NC}"
+echo "⎈ Installing Helm..."
 if ! command -v helm &> /dev/null; then
     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 fi
 
 # Install Terraform
-echo -e "${YELLOW}🏗️  Installing Terraform...${NC}"
+echo "🏗️  Installing Terraform..."
 if ! command -v terraform &> /dev/null; then
     TERRAFORM_VERSION=$(curl -s https://api.github.com/repos/hashicorp/terraform/releases/latest | jq -r '.tag_name' | sed 's/v//')
     wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
@@ -85,7 +80,7 @@ if ! command -v terraform &> /dev/null; then
 fi
 
 # Install AWS CLI
-echo -e "${YELLOW}☁️  Installing AWS CLI...${NC}"
+echo "☁️  Installing AWS CLI..."
 if ! command -v aws &> /dev/null; then
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
     unzip -q awscliv2.zip
@@ -94,7 +89,7 @@ if ! command -v aws &> /dev/null; then
 fi
 
 # Install gcloud CLI
-echo -e "${YELLOW}☁️  Installing gcloud CLI...${NC}"
+echo "☁️  Installing gcloud CLI..."
 if ! command -v gcloud &> /dev/null; then
     curl https://sdk.cloud.google.com | bash -s -- --disable-prompts
     echo 'source $HOME/google-cloud-sdk/path.zsh.inc' >> ~/.zshrc
@@ -102,7 +97,7 @@ if ! command -v gcloud &> /dev/null; then
 fi
 
 # Install Docker Compose
-echo -e "${YELLOW}🐳 Installing Docker Compose...${NC}"
+echo "🐳 Installing Docker Compose..."
 if ! command -v docker-compose &> /dev/null; then
     COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r '.tag_name')
     sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -110,7 +105,7 @@ if ! command -v docker-compose &> /dev/null; then
 fi
 
 # Install yq
-echo -e "${YELLOW}📝 Installing yq...${NC}"
+echo "📝 Installing yq..."
 if ! command -v yq &> /dev/null; then
     YQ_VERSION=$(curl -s https://api.github.com/repos/mikefarah/yq/releases/latest | jq -r '.tag_name')
     sudo wget -q https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/local/bin/yq
@@ -118,7 +113,7 @@ if ! command -v yq &> /dev/null; then
 fi
 
 # Install stern (multi pod log tailing)
-echo -e "${YELLOW}📋 Installing stern...${NC}"
+echo "📋 Installing stern..."
 if ! command -v stern &> /dev/null; then
     STERN_VERSION=$(curl -s https://api.github.com/repos/stern/stern/releases/latest | jq -r '.tag_name')
     wget -q https://github.com/stern/stern/releases/download/${STERN_VERSION}/stern_${STERN_VERSION#v}_linux_amd64.tar.gz
@@ -128,25 +123,34 @@ if ! command -v stern &> /dev/null; then
 fi
 
 # Install lazydocker
-echo -e "${YELLOW}🐋 Installing lazydocker...${NC}"
+echo "🐋 Installing lazydocker..."
 if ! command -v lazydocker &> /dev/null; then
     curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash
 fi
 
 # Symlink dotfiles
-echo -e "${YELLOW}🔗 Symlinking dotfiles...${NC}"
-DOTFILES_DIR="$HOME/.dotfiles"
+echo "🔗 Symlinking dotfiles..."
+# Lấy đường dẫn của thư mục chứa script này một cách linh hoạt
+DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Create symlinks
-ln -sf "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
-ln -sf "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
-ln -sf "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
+# Danh sách các file cần symlink
+dotfiles=(".zshrc" ".gitconfig" ".vimrc")
+
+# Tạo symlink cho từng file
+for file in "${dotfiles[@]}"; do
+    if [ -f "$DOTFILES_DIR/$file" ]; then
+        echo "Creating symlink for $file"
+        ln -sf "$DOTFILES_DIR/$file" "$HOME/$file"
+    else
+        echo "Warning: $file not found in $DOTFILES_DIR. Skipping."
+    fi
+done
 
 # Change default shell to zsh
 if [ "$SHELL" != "$(which zsh)" ]; then
-    echo -e "${YELLOW}🐚 Changing default shell to zsh...${NC}"
+    echo "🐚 Changing default shell to zsh..."
     sudo chsh -s $(which zsh) $USER
 fi
 
-echo -e "${GREEN}✅ Installation complete!${NC}"
-echo -e "${YELLOW}Please restart your terminal or run: exec zsh${NC}"
+echo "✅ Installation complete!"
+echo "Please restart your terminal or run: exec zsh"
